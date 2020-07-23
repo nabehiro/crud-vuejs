@@ -1,25 +1,27 @@
 <template>
-    <div class="todoCreate">
-        <h1>Create Todo</h1>
+  <div class="todoCreate">
+    <v-container>
+      <h1 class="text-h2">Create Todo</h1>
 
-        <p><router-link to="/Todos">Return to Todos</router-link></p>
+      <v-btn text color="error" to="/Todos">Return to Todos</v-btn>
 
-        <NotifyBox :values="notifications" />
-        <form @submit.prevent="createTodo">
-            <div>
-                <label name="todo_name">Name</label>:
-                <input type="text" v-model="name" />
-            </div>
+      <notify-box :values="notifications" :type="notificationType" />
 
-            <div>
-                <label name="todo_complete">Complete</label>:
-                <input type="checkbox" v-model="isComplete" />
-            </div>
+      <form @submit.prevent="createTodo">
+        <v-text-field
+          v-model="name"
+          label="Name"
+        ></v-text-field>
 
-            <button>Create</button>
-        </form>
-        
-    </div>
+        <v-switch
+          v-model="isComplete"
+          label="Complete"
+        ></v-switch>
+
+        <v-btn color="primary" type="submit" x-large>Create</v-btn>
+      </form>
+    </v-container>
+  </div>
 </template>
 
 <script>
@@ -30,35 +32,42 @@ export default {
         NotifyBox
     },
 
-    data() {
-        return {
-            name: '',
-            isComplete: false,
-            notifications: []
-        };
-    },
+  data() {
+    return {
+      name: "",
+      isComplete: false,
+      notifications: [],
+      notificationType: "info"
+    };
+  },
 
-    methods: {
-        createTodo() {
-            console.log('start createTodo');
+  methods: {
+    createTodo() {
+      console.log("start createTodo");
 
-            this.notifications = [];
+      this.notifications = [];
 
-            if (!this.name) {
-                this.notifications.push("Name is required");
-                return false;
-            }
+      if (!this.name) {
+        this.notificationType = "error";
+        this.notifications.push("Name is required");
+        return false;
+      }
 
-            const todo = { name: this.name, isComplete: this.isComplete };
+      const todo = { name: this.name, isComplete: this.isComplete };
 
-            this.axios
-                .post('https://localhost:44323/api/todoitems', todo)
-                .then(response => {
-                    console.log(response);
+      this.axios
+        .post("https://localhost:44323/api/todoitems", todo)
+        .then(response => {
+          console.log(response);
 
-                    this.notifications.push(`result status:${response.status}, data:${JSON.stringify(response.data)}`);
-                });
-        }
+          this.notificationType = "success";
+          this.notifications.push(
+            `result status:${response.status}, data:${JSON.stringify(
+              response.data
+            )}`
+          );
+        });
     }
-}
+  }
+};
 </script>

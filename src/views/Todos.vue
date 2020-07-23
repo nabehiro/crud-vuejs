@@ -1,86 +1,88 @@
 <template>
   <div class="todos">
-    <h1>This is an todos page</h1>
+    <v-container>
+      <h1 class="text-h2">Todo List</h1>
 
-    <NotifyBox :values="notifications" />
+      <NotifyBox :values="notifications" :type="notificationType" />
 
-    <table>
-        <thead>
-            <tr>
-                <th>ID</th>
-                <th>Name</th>
-                <th>Completed</th>
-                <th>Edit</th>
-                <th>Delete</th>
-            </tr>
-        </thead>
-        <tbody>
-            <tr v-for="todo in todos" :key="todo.id">
-                <td>{{ todo.id }}</td>
-                <td>{{ todo.name }}</td>
-                <td>{{ todo.isComplete }}</td>
-                <td>
-                    <router-link :to="'/todos/edit/' + todo.id">edit</router-link>
-                </td>
-                <td>
-                    <button @click="deleteTodo(todo.id)">delete</button>
-                </td>
-            </tr>
-        </tbody>
-    </table>
-    <div>
-        <router-link to="/todos/create">Create</router-link>
-    </div>
+      <v-data-table dense :headers="tableHeaders" :items="todos">
+        <template v-slot:item.actions="{ item }">
+          <router-link class="text-decoration-none" :to="`/todos/edit/${item.id}`">
+            <v-icon small class="mr-2">mdi-pencil</v-icon>
+          </router-link>
+          
+          <v-icon small @click="deleteTodo(item.id)">mdi-delete</v-icon>
+        </template>
+        <template v-slot:item.isComplete="{ item }">
+          <v-checkbox v-model="item.isComplete" readonly></v-checkbox>
+        </template>
+      </v-data-table>
+
+      <div>
+        <v-btn color="info" to="/todos/create">Create</v-btn>
+      </div>
+    </v-container>
   </div>
 </template>
 
 <script>
-import NotifyBox from '@/components/NotifyBox.vue'
+import NotifyBox from "@/components/NotifyBox.vue";
 
 export default {
-    components: {
-        NotifyBox
+  components: {
+    NotifyBox,
+  },
+  data() {
+    return {
+      todos: [],
+      query: "",
+      notifications: [],
+      notificationType: "info",
+      tableHeaders: [
+        { text: "ID", value: "id" },
+        { text: "Name", value: "name" },
+        { text: "Completed", value: "isComplete" },
+        { text: "Actions", value: "actions", sortable: false },
+      ],
+    };
+  },
+
+  mounted() {
+    console.log("mounted");
+    this.fetchTodos();
+  },
+
+  methods: {
+    fetchTodos() {
+      this.axios
+        .get("https://localhost:44323/api/todoitems")
+        .then((response) => {
+          this.todos = response.data;
+        });
     },
 
-    data() {
-        return {
-            todos: [],
-            query: '',
-            notifications: []
-        };
+    deleteTodo(id) {
+      console.log("delete", id);
+
+      if (!confirm(`delete todo:${id} ?`)) {
+        return;
+      }
+
+      this.axios
+        .delete(`https://localhost:44323/api/todoitems/${id}`)
+        .then((response) => {
+          console.log(response);
+
+          this.notificationType = "success";
+          this.notifications.push(
+            `result status:${response.status}, data:${JSON.stringify(
+              response.data
+            )}`
+          );
+
+          this.fetchTodos();
+        });
     },
-
-    mounted() {
-        console.log('mounted');
-        this.fetchTodos();
-    },
-
-    methods: {
-        fetchTodos() {
-            this.axios
-                .get('https://localhost:44323/api/todoitems')
-                .then(response => {
-                    this.todos = response.data;
-                })
-        },
-
-        deleteTodo(id) {
-            console.log('delete', id);
-
-            if (!confirm(`delete todo:${id} ?`)) {
-                return;
-            }
-
-            this.axios
-                .delete(`https://localhost:44323/api/todoitems/${id}`)
-                .then(response => {
-                    console.log(response);
-
-                    this.notifications.push(`result status:${response.status}, data:${JSON.stringify(response.data)}`);
-
-                    this.fetchTodos();
-                })
-        }
-    }
-}
+  },
+};
 </script>

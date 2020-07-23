@@ -1,82 +1,86 @@
 <template>
-    <div class="todoEdit">
-        <h1>Edit Todo</h1>
+  <v-container>
+    <h1 class="text-h2">Edit Todo</h1>
 
-        <p><router-link to="/Todos">Return to Todos</router-link></p>
+    <v-btn text color="error" to="/Todos">Return to Todos</v-btn>
 
-        <NotifyBox :values="notifications" />
-        <form @submit.prevent="editTodo">
-            <div>
-                <label name="todo_id">Id</label>:
-                <span>{{ id }}</span>
-            </div>
+    <notify-box :values="notifications" :type="notificationType" />
 
-            <div>
-                <label name="todo_name">Name</label>:
-                <input type="text" v-model="name" />
-            </div>
+    <form @submit.prevent="editTodo">
+      <v-text-field
+        readonly
+          v-model="id"
+          label="Id"
+        ></v-text-field>
 
-            <div>
-                <label name="todo_complete">Complete</label>:
-                <input type="checkbox" v-model="isComplete" />
-            </div>
+      <v-text-field v-model="name" label="Name"></v-text-field>
 
-            <button>Edit</button>
-        </form>
-        
-    </div>
+      <v-switch v-model="isComplete" label="Complete"></v-switch>
+
+      <v-btn color="primary" type="submit" x-large>Edit</v-btn>
+    </form>
+  </v-container>
 </template>
 
 <script>
-import NotifyBox from '@/components/NotifyBox.vue'
+import NotifyBox from "@/components/NotifyBox.vue";
 
 export default {
-    components: {
-        NotifyBox
+  components: {
+    NotifyBox,
+  },
+
+  data() {
+    return {
+      id: 0,
+      name: "",
+      isComplete: false,
+      notifications: [],
+      notificationType: "info"
+    };
+  },
+
+  mounted() {
+    this.axios
+      .get(`https://localhost:44323/api/todoitems/${this.$route.params.id}`)
+      .then((response) => {
+        this.id = response.data.id;
+        this.name = response.data.name;
+        this.isComplete = response.data.isComplete;
+      });
+  },
+
+  methods: {
+    editTodo() {
+      console.log("start editTodo");
+
+      this.notifications = [];
+
+      if (!this.name) {
+        this.notificationType = "error";
+        this.notifications.push("Name is required");
+        return false;
+      }
+
+      const todo = {
+        id: this.id,
+        name: this.name,
+        isComplete: this.isComplete,
+      };
+
+      this.axios
+        .put(`https://localhost:44323/api/todoitems/${this.id}`, todo)
+        .then((response) => {
+          console.log(response);
+
+          this.notificationType = "success";
+          this.notifications.push(
+            `result status:${response.status}, data:${JSON.stringify(
+              response.data
+            )}`
+          );
+        });
     },
-
-    data() {
-        return {
-            id: 0,
-            name: '',
-            isComplete: false,
-            notifications: []
-        };
-    },
-
-    mounted() {
-        this.axios
-            .get(`https://localhost:44323/api/todoitems/${this.$route.params.id}`)
-            .then(response => {
-                this.id = response.data.id;
-                this.name = response.data.name;
-                this.isComplete = response.data.isComplete;
-            });
-    },
-
-    methods: {
-        editTodo() {
-            console.log('start editTodo');
-
-            this.notifications = [];
-
-            if (!this.name) {
-                this.notifications.push("Name is required");
-                return false;
-            }
-
-            const todo = { id: this.id, name: this.name, isComplete: this.isComplete };
-
-            this.axios
-                .put(`https://localhost:44323/api/todoitems/${this.id}`, todo)
-                .then(response => {
-                    console.log(response);
-
-                    this.notifications.push(`result status:${response.status}, data:${JSON.stringify(response.data)}`);
-                });
-        }
-    }
-
-    
-}
+  },
+};
 </script>
