@@ -8,7 +8,7 @@ export default new Vuex.Store({
     moveCount: 0
   },
   mutations: {
-    incrementMove(state) {
+    INCREMENT_MOVE(state) {
       state.moveCount += 1;
     }
   },
