@@ -5,8 +5,12 @@ Vue.use(Vuex)
 
 export default new Vuex.Store({
   state: {
+    moveCount: 0
   },
   mutations: {
+    incrementMove(state) {
+      state.moveCount += 1;
+    }
   },
   actions: {
   },

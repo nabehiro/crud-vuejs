@@ -9,6 +9,11 @@ Vue.config.productionTip = false
 
 api.init();
 
+router.afterEach((to, from) => {
+  store.commit('incrementMove');
+  console.log('moved from ', from, ' to ', to, store.state.moveCount);
+});
+
 new Vue({
   router,
   vuetify,
