@@ -27,6 +27,7 @@
 
 <script>
 import NotifyBox from "@/components/NotifyBox.vue";
+import api from '@/common/api';
 
 export default {
   components: {
@@ -54,8 +55,7 @@ export default {
 
   methods: {
     fetchTodos() {
-      this.axios
-        .get("https://localhost:44323/api/todoitems")
+      api.getTodos()
         .then((response) => {
           this.todos = response.data;
         });
@@ -68,10 +68,8 @@ export default {
         return;
       }
 
-      this.axios
-        .delete(`https://localhost:44323/api/todoitems/${id}`)
+      api.deleteTodo(id)
         .then((response) => {
-          console.log(response);
 
           this.notificationType = "success";
           this.notifications.push(

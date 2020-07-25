@@ -24,6 +24,7 @@
 
 <script>
 import NotifyBox from "@/components/NotifyBox.vue";
+import api from '@/common/api';
 
 export default {
   components: {
@@ -41,8 +42,7 @@ export default {
   },
 
   mounted() {
-    this.axios
-      .get(`https://localhost:44323/api/todoitems/${this.$route.params.id}`)
+    api.getTodo(this.$route.params.id)
       .then((response) => {
         this.id = response.data.id;
         this.name = response.data.name;
@@ -68,8 +68,7 @@ export default {
         isComplete: this.isComplete,
       };
 
-      this.axios
-        .put(`https://localhost:44323/api/todoitems/${this.id}`, todo)
+      api.putTodo(this.id, todo)
         .then((response) => {
           console.log(response);
 

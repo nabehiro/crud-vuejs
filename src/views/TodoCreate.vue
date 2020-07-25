@@ -26,6 +26,7 @@
 
 <script>
 import NotifyBox from '@/components/NotifyBox.vue'
+import api from '@/common/api';
 
 export default {
     components: {
@@ -55,8 +56,7 @@ export default {
 
       const todo = { name: this.name, isComplete: this.isComplete };
 
-      this.axios
-        .post("https://localhost:44323/api/todoitems", todo)
+      api.postTodo(todo)
         .then(response => {
           console.log(response);
 
