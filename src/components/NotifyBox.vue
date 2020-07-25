@@ -1,24 +1,24 @@
 <template>
-  <v-alert :type="type" v-show="values.length > 0">
+  <v-alert :type="notificationType" v-show="notifications.length > 0">
     <ul>
-      <li v-for="value in values" :key="value">{{ value }}</li>
+      <li v-for="value in notifications" :key="value">{{ value }}</li>
     </ul>
   </v-alert>
 </template>
 
 <script>
+import { mapState } from 'vuex';
+
 export default {
   data() {
     return {};
   },
 
-  props: {
-    values: {
-      type: Array
-    },
-    type: {
-      type: String
-    }
+  computed: {
+    ...mapState([
+      'notifications',
+      'notificationType']
+    )
   }
 };
 </script>

@@ -3,7 +3,7 @@
     <v-container>
       <h1 class="text-h2">Todo List</h1>
 
-      <NotifyBox :values="notifications" :type="notificationType" />
+      <NotifyBox />
 
       <v-data-table dense :headers="tableHeaders" :items="todos">
         <template v-slot:item.actions="{ item }">
@@ -11,7 +11,7 @@
             <v-icon small class="mr-2">mdi-pencil</v-icon>
           </router-link>
           
-          <v-icon small @click="deleteTodo(item.id)">mdi-delete</v-icon>
+          <v-icon small @click="onDeleteTodo(item.id)">mdi-delete</v-icon>
         </template>
         <template v-slot:item.isComplete="{ item }">
           <v-checkbox v-model="item.isComplete" readonly></v-checkbox>
@@ -27,7 +27,7 @@
 
 <script>
 import NotifyBox from "@/components/NotifyBox.vue";
-import api from '@/common/api';
+import { mapActions } from 'vuex';
 
 export default {
   components: {
@@ -37,8 +37,6 @@ export default {
     return {
       todos: [],
       query: "",
-      notifications: [],
-      notificationType: "info",
       tableHeaders: [
         { text: "ID", value: "id" },
         { text: "Name", value: "name" },
@@ -49,37 +47,24 @@ export default {
   },
 
   mounted() {
-    console.log("mounted");
     this.fetchTodos();
   },
 
   methods: {
-    fetchTodos() {
-      api.getTodos()
-        .then((response) => {
-          this.todos = response.data;
-        });
+    ...mapActions(['deleteTodo', 'getTodos']),
+
+    async fetchTodos() {
+      const response = await this.getTodos();
+      this.todos = response.data;
     },
 
-    deleteTodo(id) {
-      console.log("delete", id);
-
+    async onDeleteTodo(id) {
       if (!confirm(`delete todo:${id} ?`)) {
         return;
       }
 
-      api.deleteTodo(id)
-        .then((response) => {
-
-          this.notificationType = "success";
-          this.notifications.push(
-            `result status:${response.status}, data:${JSON.stringify(
-              response.data
-            )}`
-          );
-
-          this.fetchTodos();
-        });
+      await this.deleteTodo(id);
+      await this.fetchTodos();
     },
   },
 };

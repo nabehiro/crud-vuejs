@@ -11,6 +11,7 @@ api.init();
 
 router.afterEach((to, from) => {
   store.commit('INCREMENT_MOVE');
+  store.commit('CLEAR_NOTIFICATIONS');
   console.log('moved from ', from, ' to ', to, store.state.moveCount);
 });
 

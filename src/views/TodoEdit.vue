@@ -4,7 +4,7 @@
 
     <v-btn text color="error" to="/Todos">Return to Todos</v-btn>
 
-    <notify-box :values="notifications" :type="notificationType" />
+    <notify-box />
 
     <form @submit.prevent="editTodo">
       <v-text-field
@@ -24,7 +24,7 @@
 
 <script>
 import NotifyBox from "@/components/NotifyBox.vue";
-import api from '@/common/api';
+import { mapActions } from 'vuex';
 
 export default {
   components: {
@@ -35,50 +35,29 @@ export default {
     return {
       id: 0,
       name: "",
-      isComplete: false,
-      notifications: [],
-      notificationType: "info"
+      isComplete: false
     };
   },
 
-  mounted() {
-    api.getTodo(this.$route.params.id)
-      .then((response) => {
-        this.id = response.data.id;
-        this.name = response.data.name;
-        this.isComplete = response.data.isComplete;
-      });
+  async mounted() {
+    const response = await this.getTodo(this.$route.params.id);
+
+    this.id = response.data.id;
+    this.name = response.data.name;
+    this.isComplete = response.data.isComplete;
   },
 
   methods: {
-    editTodo() {
-      console.log("start editTodo");
+    ...mapActions(['getTodo', 'updateTodo']),
 
-      this.notifications = [];
-
-      if (!this.name) {
-        this.notificationType = "error";
-        this.notifications.push("Name is required");
-        return false;
-      }
-
+    async editTodo() {
       const todo = {
         id: this.id,
         name: this.name,
         isComplete: this.isComplete,
       };
 
-      api.putTodo(this.id, todo)
-        .then((response) => {
-          console.log(response);
-
-          this.notificationType = "success";
-          this.notifications.push(
-            `result status:${response.status}, data:${JSON.stringify(
-              response.data
-            )}`
-          );
-        });
+      await this.updateTodo(todo);
     },
   },
 };

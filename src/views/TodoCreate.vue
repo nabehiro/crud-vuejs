@@ -5,9 +5,9 @@
 
       <v-btn text color="error" to="/Todos">Return to Todos</v-btn>
 
-      <notify-box :values="notifications" :type="notificationType" />
+      <notify-box />
 
-      <form @submit.prevent="createTodo">
+      <form @submit.prevent="addTodo">
         <v-text-field
           v-model="name"
           label="Name"
@@ -26,7 +26,7 @@
 
 <script>
 import NotifyBox from '@/components/NotifyBox.vue'
-import api from '@/common/api';
+import { mapActions } from 'vuex';
 
 export default {
     components: {
@@ -36,37 +36,20 @@ export default {
   data() {
     return {
       name: "",
-      isComplete: false,
-      notifications: [],
-      notificationType: "info"
+      isComplete: false
     };
   },
 
   methods: {
-    createTodo() {
-      console.log("start createTodo");
+    ...mapActions(['createTodo']),
 
-      this.notifications = [];
+    async addTodo() {
+      const todo = { 
+        name: this.name,
+        isComplete: this.isComplete
+      };
 
-      if (!this.name) {
-        this.notificationType = "error";
-        this.notifications.push("Name is required");
-        return false;
-      }
-
-      const todo = { name: this.name, isComplete: this.isComplete };
-
-      api.postTodo(todo)
-        .then(response => {
-          console.log(response);
-
-          this.notificationType = "success";
-          this.notifications.push(
-            `result status:${response.status}, data:${JSON.stringify(
-              response.data
-            )}`
-          );
-        });
+      await this.createTodo(todo);
     }
   }
 };
